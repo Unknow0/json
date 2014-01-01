@@ -1,3 +1,13 @@
+/*******************************************************************************
+ * Copyright (c) 2014 Unknow.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the GNU Lesser Public License v3
+ * which accompanies this distribution, and is available at
+ * http://www.gnu.org/licenses/lgpl-3.0.html
+ * 
+ * Contributors:
+ *     Unknow - initial API and implementation
+ ******************************************************************************/
 package unknow.json;
 
 import java.io.*;
@@ -6,8 +16,6 @@ import java.io.*;
  * A JsonTokener takes a source string and extracts characters and tokens from
  * it. It is used by the JsonObject and JsonArray constructors to parse
  * Json source strings.
- * @author Json.org
- * @version 2010-12-24
  */
 public class JsonTokener {
 

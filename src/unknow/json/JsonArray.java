@@ -1,3 +1,13 @@
+/*******************************************************************************
+ * Copyright (c) 2014 Unknow.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the GNU Lesser Public License v3
+ * which accompanies this distribution, and is available at
+ * http://www.gnu.org/licenses/lgpl-3.0.html
+ * 
+ * Contributors:
+ *     Unknow - initial API and implementation
+ ******************************************************************************/
 package unknow.json;
 
 import java.io.IOException;
@@ -50,9 +60,6 @@ import java.util.Iterator;
  * well as by <code>,</code> <small>(comma)</small>.</li>
  * <li>Numbers may have the <code>0x-</code> <small>(hex)</small> prefix.</li>
  * </ul>
- * 
- * @author Json.org
- * @version 2011-05-04
  */
 public class JsonArray implements JsonValue
 	{

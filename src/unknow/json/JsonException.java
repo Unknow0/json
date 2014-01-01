@@ -1,9 +1,17 @@
+/*******************************************************************************
+ * Copyright (c) 2014 Unknow.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the GNU Lesser Public License v3
+ * which accompanies this distribution, and is available at
+ * http://www.gnu.org/licenses/lgpl-3.0.html
+ * 
+ * Contributors:
+ *     Unknow - initial API and implementation
+ ******************************************************************************/
 package unknow.json;
 
 /**
  * The JSONException is thrown by the JSON.org classes when things are amiss.
- * @author  JSON.org
- * @version  2010-12-24
  */
 public class JsonException extends Exception {
 	private static final long serialVersionUID = 0;
