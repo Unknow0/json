@@ -6,7 +6,7 @@
  * http://www.gnu.org/licenses/lgpl-3.0.html
  * 
  * Contributors:
- *     Unknow - initial API and implementation
+ * Unknow - initial API and implementation
  ******************************************************************************/
 package unknow.json;
 
@@ -14,6 +14,15 @@ import java.io.*;
 
 public interface JsonValue
 	{
+
+	/**
+	 * It is sometimes more convenient and less ambiguous to have a
+	 * <code>NULL</code> object than to use Java's <code>null</code> value.
+	 * <code>JsonObject.NULL.equals(null)</code> returns <code>true</code>.
+	 * <code>JsonObject.NULL.toString()</code> returns <code>"null"</code>.
+	 */
+	public static final JsonValue NULL=new JsonValue.Null();
+	
 	public String toString();
 
 	public void toString(StringBuilder sb);

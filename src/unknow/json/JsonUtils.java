@@ -6,36 +6,26 @@
  * http://www.gnu.org/licenses/lgpl-3.0.html
  * 
  * Contributors:
- *     Unknow - initial API and implementation
+ * Unknow - initial API and implementation
  ******************************************************************************/
 package unknow.json;
 
-import java.lang.reflect.*;
 
 public class JsonUtils
 	{
 	/**
-	 * It is sometimes more convenient and less ambiguous to have a
-	 * <code>NULL</code> object than to use Java's <code>null</code> value.
-	 * <code>JsonObject.NULL.equals(null)</code> returns <code>true</code>.
-	 * <code>JsonObject.NULL.toString()</code> returns <code>"null"</code>.
-	 */
-	public static final JsonValue NULL=new JsonValue.Null();
-
-	/**
 	 * Wrap an object, if necessary. If the object is null, return the NULL
-	 * object. If it is an array wrap it in a JsonArray. . If it is a standard
-	 * property (Double, String, et al) then it is already wrapped. If the
+	 * object. If it is an array wrap it in a JsonArray. . If the
 	 * wrapping fails, then null is returned.
 	 * 
 	 * @param object
 	 *            The object to wrap
 	 * @return The wrapped value
 	 */
-	public static JsonValue wrap(Object object)
+	public static final JsonValue wrap(Object object)
 		{
 		if(object==null)
-			return NULL;
+			return JsonValue.NULL;
 		if(object instanceof String)
 			return new JsonValue.JsonString((String)object);
 		if(object instanceof JsonValue)
@@ -46,7 +36,6 @@ public class JsonUtils
 			return new JsonArray(object);
 		return null;
 		}
-
 	/**
 	 * Produce a string in double quotes with backslash sequences in all the
 	 * right places. A backslash will be inserted within </, producing <\/,
@@ -145,7 +134,7 @@ public class JsonUtils
 			}
 		if(string.equalsIgnoreCase("null"))
 			{
-			return JsonUtils.NULL;
+			return JsonValue.NULL;
 			}
 
 		/*
@@ -193,39 +182,5 @@ public class JsonUtils
 				}
 			}
 		return string;
-		}
-
-	public static JsonValue toJsonValue(Object o)
-		{
-		if(o==null)
-			return NULL;
-		if(o instanceof String)
-			return new JsonValue.JsonString((String)o);
-		if(o instanceof JsonValue)
-			return (JsonValue)o;
-		if(o instanceof Byte||o instanceof Character||o instanceof Short||o instanceof Integer||o instanceof Long||o instanceof Boolean||o instanceof Float||o instanceof Double)
-			return new JsonValue.Native(o);
-		if(o.getClass().isArray())
-			{
-			JsonArray a=new JsonArray();
-			Object[] t=(Object[])o;
-			for(int i=0; i<t.length; i++)
-				a.put(toJsonValue(t[i]));
-			return a;
-			}
-		JsonObject obj=new JsonObject();
-		Field[] fields=o.getClass().getDeclaredFields();
-		for(int i=0; i<fields.length; i++)
-			{
-			Field f=fields[i];
-			try
-				{
-				obj.put(f.getName(), f.get(o));
-				}
-			catch (IllegalAccessException e)
-				{
-				}
-			}
-		return obj;
 		}
 	}

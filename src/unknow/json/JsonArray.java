@@ -100,7 +100,7 @@ public class JsonArray implements JsonValue
 				if(x.nextClean()==',')
 					{
 					x.back();
-					this.myArrayList.add(JsonUtils.NULL);
+					this.myArrayList.add(JsonValue.NULL);
 					}
 				else
 					{
@@ -358,7 +358,7 @@ public class JsonArray implements JsonValue
 	 */
 	public boolean isNull(int index)
 		{
-		return JsonUtils.NULL.equals(opt(index));
+		return JsonValue.NULL.equals(opt(index));
 		}
 
 	/**
@@ -827,7 +827,7 @@ public class JsonArray implements JsonValue
 			{
 			while (index!=length())
 				{
-				put(JsonUtils.NULL);
+				put(JsonValue.NULL);
 				}
 			put(value);
 			}
@@ -1039,6 +1039,6 @@ public class JsonArray implements JsonValue
 
 	public boolean contains(Object o)
 		{
-		return myArrayList.contains(o==null?JsonUtils.NULL:o);
+		return myArrayList.contains(o==null?JsonValue.NULL:o);
 		}
 	}

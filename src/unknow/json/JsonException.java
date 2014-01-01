@@ -6,38 +6,33 @@
  * http://www.gnu.org/licenses/lgpl-3.0.html
  * 
  * Contributors:
- *     Unknow - initial API and implementation
+ * Unknow - initial API and implementation
  ******************************************************************************/
 package unknow.json;
 
 /**
  * The JSONException is thrown by the JSON.org classes when things are amiss.
  */
-public class JsonException extends Exception {
-	private static final long serialVersionUID = 0;
+public class JsonException extends Exception
+	{
+	private static final long serialVersionUID=0;
+
 	/**
-	 * @uml.property  name="cause"
+	 * Constructs a JSONException with an explanatory message.
+	 * @param message Detail about the reason for the exception.
 	 */
-	private Throwable cause;
+	public JsonException(String message)
+		{
+		super(message);
+		}
 
-    /**
-     * Constructs a JSONException with an explanatory message.
-     * @param message Detail about the reason for the exception.
-     */
-    public JsonException(String message) {
-        super(message);
-    }
+	public JsonException(Throwable cause)
+		{
+		super(cause);
+		}
 
-    public JsonException(Throwable cause) {
-        super(cause.getMessage());
-        this.cause = cause;
-    }
-
-    /**
-	 * @return
-	 * @uml.property  name="cause"
-	 */
-    public Throwable getCause() {
-        return this.cause;
-    }
-}
+	public JsonException(String message, Throwable cause)
+		{
+		super(message, cause);
+		}
+	}

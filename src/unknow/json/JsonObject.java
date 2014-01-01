@@ -324,7 +324,7 @@ public class JsonObject implements Iterable<String>, JsonValue
 	 */
 	public boolean isNull(String key)
 		{
-		return JsonUtils.NULL.equals(opt(key));
+		return JsonValue.NULL.equals(opt(key));
 		}
 
 	/**
@@ -588,7 +588,7 @@ public class JsonObject implements Iterable<String>, JsonValue
 	public String optString(String key, String defaultValue)
 		{
 		JsonValue object=opt(key);
-		return JsonUtils.NULL.equals(object)?defaultValue:object.toString();
+		return JsonValue.NULL.equals(object)?defaultValue:object.toString();
 		}
 
 	/**
