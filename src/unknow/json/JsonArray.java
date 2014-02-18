@@ -61,7 +61,7 @@ import java.util.Iterator;
  * <li>Numbers may have the <code>0x-</code> <small>(hex)</small> prefix.</li>
  * </ul>
  */
-public class JsonArray implements JsonValue
+public class JsonArray implements Iterable<JsonValue>, JsonValue
 	{
 
 	/**
@@ -1040,5 +1040,10 @@ public class JsonArray implements JsonValue
 	public boolean contains(Object o)
 		{
 		return myArrayList.contains(o==null?JsonValue.NULL:o);
+		}
+
+	public Iterator<JsonValue> iterator()
+		{
+		return myArrayList.iterator();
 		}
 	}
