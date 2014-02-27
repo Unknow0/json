@@ -993,20 +993,16 @@ public class JsonArray implements Iterable<JsonValue>, JsonValue
 	 */
 	public void write(Writer writer) throws IOException
 		{
-		boolean b=false;
 		int len=length();
 
 		writer.write('[');
 
 		for(int i=0; i<len; i+=1)
 			{
-			if(b)
-				{
+			if(i>0)
 				writer.write(',');
-				}
 			JsonValue v=this.myArrayList.get(i);
 			v.write(writer);
-			b=true;
 			}
 		writer.write(']');
 		}

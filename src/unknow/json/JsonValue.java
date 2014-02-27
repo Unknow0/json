@@ -65,6 +65,7 @@ public interface JsonValue
 
 	public static final class Null extends AbstractValue
 		{
+		private Null() {};
 		protected final Object clone()
 			{
 			return this;
