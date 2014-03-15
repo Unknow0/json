@@ -6,7 +6,7 @@
  * http://www.gnu.org/licenses/lgpl-3.0.html
  * 
  * Contributors:
- *     Unknow - initial API and implementation
+ * Unknow - initial API and implementation
  ******************************************************************************/
 package unknow.json;
 
@@ -59,9 +59,12 @@ public class JsonObject implements Iterable<String>, JsonValue
 					throw x.syntaxError("A JsonObject text must end with '}'");
 				case '}':
 					return;
+				case '"':
+				case '\'':
+					key=x.nextString(c);
+					break;
 				default:
-					x.back();
-					key=x.nextValue().toString();
+					throw x.syntaxError("A JsonObject key must start with '\"'");
 				}
 
 			// The key is followed by ':'. We will also tolerate '=' or '=>'.
@@ -124,10 +127,10 @@ public class JsonObject implements Iterable<String>, JsonValue
 	 *             If the key is null or if the current value associated with
 	 *             the key is not a JsonArray.
 	 */
-	public JsonObject append(String key, Object value) throws JsonException
+	public JsonObject append(String key, JsonValue value) throws JsonException
 		{
 		testValidity(value);
-		Object object=opt(key);
+		JsonValue object=opt(key);
 		if(object==null)
 			put(key, new JsonArray().put(value));
 		else if(object instanceof JsonArray)
@@ -690,7 +693,7 @@ public class JsonObject implements Iterable<String>, JsonValue
 	 * @throws IllegalArgumentException
 	 *             If the value is non-finite number or if the key is null.
 	 */
-	public JsonObject put(String key, Object value)
+	public JsonObject put(String key, JsonValue value)
 		{
 		if(key==null)
 			{
@@ -719,7 +722,7 @@ public class JsonObject implements Iterable<String>, JsonValue
 	 * @throws JsonException
 	 *             if the key is a duplicate
 	 */
-	public JsonObject putOnce(String key, Object value) throws JsonException
+	public JsonObject putOnce(String key, JsonValue value) throws JsonException
 		{
 		if(key!=null&&value!=null)
 			{
@@ -746,7 +749,7 @@ public class JsonObject implements Iterable<String>, JsonValue
 	 * @throws JsonException
 	 *             If the value is a non-finite number.
 	 */
-	public JsonObject putOpt(String key, Object value) throws JsonException
+	public JsonObject putOpt(String key, JsonValue value) throws JsonException
 		{
 		if(key!=null&&value!=null)
 			{
@@ -763,7 +766,7 @@ public class JsonObject implements Iterable<String>, JsonValue
 	 * @return The value that was associated with the name, or null if there was
 	 *         no value.
 	 */
-	public Object remove(String key)
+	public JsonValue remove(String key)
 		{
 		return map.remove(key);
 		}
@@ -874,54 +877,29 @@ public class JsonObject implements Iterable<String>, JsonValue
 
 	public void toString(StringBuilder sb, int indentFactor, int indent)
 		{
-		int i;
-		int length=this.length();
-		if(length==0)
+		if(map.isEmpty())
 			{
 			sb.append("{}");
 			return;
 			}
-		Iterator<String> keys=iterator();
 		int newindent=indent+indentFactor;
-		String object;
-		sb.append("{");
-		if(length==1)
+		sb.append("{\n");
+
+		boolean commanate=false;
+		for(Map.Entry<String,JsonValue> e:map.entrySet())
 			{
-			object=keys.next();
-			sb.append(JsonUtils.quote(object.toString()));
+			if(commanate)
+				sb.append(",\n");
+			for(int i=0; i<newindent; i++)
+				sb.append(' ');
+			sb.append(JsonUtils.quote(e.getKey()));
 			sb.append(": ");
-			map.get(object).toString(sb, indentFactor, indent);
+			e.getValue().toString(sb, indentFactor, newindent);
+			commanate=true;
 			}
-		else
-			{
-			while (keys.hasNext())
-				{
-				object=keys.next();
-				if(sb.length()>1)
-					{
-					sb.append(",\n");
-					}
-				else
-					{
-					sb.append('\n');
-					}
-				for(i=0; i<newindent; i+=1)
-					{
-					sb.append(' ');
-					}
-				sb.append(JsonUtils.quote(object.toString()));
-				sb.append(": ");
-				map.get(object).toString(sb, indentFactor, newindent);
-				}
-			if(sb.length()>1)
-				{
-				sb.append('\n');
-				for(i=0; i<indent; i+=1)
-					{
-					sb.append(' ');
-					}
-				}
-			}
+		sb.append('\n');
+		for(int i=0; i<indent; i++)
+			sb.append(' ');
 		sb.append('}');
 		}
 

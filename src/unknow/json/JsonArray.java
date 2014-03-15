@@ -6,7 +6,7 @@
  * http://www.gnu.org/licenses/lgpl-3.0.html
  * 
  * Contributors:
- *     Unknow - initial API and implementation
+ * Unknow - initial API and implementation
  ******************************************************************************/
 package unknow.json;
 
@@ -105,7 +105,7 @@ public class JsonArray implements Iterable<JsonValue>, JsonValue
 				else
 					{
 					x.back();
-					this.myArrayList.add(JsonUtils.wrap(x.nextValue()));
+					this.myArrayList.add(x.nextValue());
 					}
 				switch (x.nextClean())
 					{
@@ -244,7 +244,7 @@ public class JsonArray implements Iterable<JsonValue>, JsonValue
 			if(o.value() instanceof Number)
 				return ((Number)o.value()).doubleValue();
 			}
-			throw new JsonException("JsonArray["+index+"] is not a number.");
+		throw new JsonException("JsonArray["+index+"] is not a number.");
 		}
 
 	/**
@@ -265,7 +265,7 @@ public class JsonArray implements Iterable<JsonValue>, JsonValue
 			if(o.value() instanceof Number)
 				return ((Number)o.value()).intValue();
 			}
-			throw new JsonException("JsonArray["+index+"] is not a number.");
+		throw new JsonException("JsonArray["+index+"] is not a number.");
 		}
 
 	/**
@@ -327,7 +327,7 @@ public class JsonArray implements Iterable<JsonValue>, JsonValue
 			if(o.value() instanceof Number)
 				return ((Number)o.value()).longValue();
 			}
-			throw new JsonException("JsonArray["+index+"] is not a number.");
+		throw new JsonException("JsonArray["+index+"] is not a number.");
 		}
 
 	/**
@@ -956,29 +956,22 @@ public class JsonArray implements Iterable<JsonValue>, JsonValue
 			return;
 			}
 		int i;
-		if(len==1)
-			myArrayList.get(0).toString(sb, indentFactor, indent);
-		else
+		int newindent=indent+indentFactor;
+		sb.append("[\n");
+		for(i=0; i<len; i++)
 			{
-			int newindent=indent+indentFactor;
-			sb.append('\n');
-			for(i=0; i<len; i+=1)
+			if(i>0)
 				{
-				if(i>0)
-					{
-					sb.append(",\n");
-					}
-				for(int j=0; j<newindent; j+=1)
-					{
-					sb.append(' ');
-					}
-				this.myArrayList.get(i).toString(sb, indentFactor, newindent);
+				sb.append(",\n");
 				}
-			sb.append('\n');
-			for(i=0; i<indent; i+=1)
-				{
+			for(int j=0; j<newindent; j++)
 				sb.append(' ');
-				}
+			this.myArrayList.get(i).toString(sb, indentFactor, newindent);
+			}
+		sb.append('\n');
+		for(i=0; i<indent; i+=1)
+			{
+			sb.append(' ');
 			}
 		sb.append(']');
 		}

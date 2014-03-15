@@ -360,7 +360,7 @@ public class JsonTokener
 	 *
 	 * @return An object.
 	 */
-	public Object nextValue() throws JsonException
+	public JsonValue nextValue() throws JsonException
 		{
 		char c=nextClean();
 		String string;
@@ -369,7 +369,7 @@ public class JsonTokener
 			{
 			case '"':
 			case '\'':
-				return nextString(c);
+				return JsonUtils.wrap(nextString(c));
 			case '{':
 				back();
 				return new JsonObject(this);

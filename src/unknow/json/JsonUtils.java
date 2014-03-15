@@ -118,24 +118,16 @@ public class JsonUtils
 	 *            A String.
 	 * @return A simple Json value.
 	 */
-	public static Object stringToValue(String string)
+	public static JsonValue stringToValue(String string)
 		{
 		if(string.equals(""))
-			{
-			return string;
-			}
+			return new JsonValue.JsonString("");
 		if(string.equalsIgnoreCase("true"))
-			{
-			return Boolean.TRUE;
-			}
+			return new JsonValue.Native(Boolean.TRUE);
 		if(string.equalsIgnoreCase("false"))
-			{
-			return Boolean.FALSE;
-			}
+			return new JsonValue.Native(Boolean.FALSE);
 		if(string.equalsIgnoreCase("null"))
-			{
 			return JsonValue.NULL;
-			}
 
 		/*
 		 * If it might be a number, try converting it. We support the
@@ -152,7 +144,7 @@ public class JsonUtils
 				{
 				try
 					{
-					return new Integer(Integer.parseInt(string.substring(2), 16));
+					return new JsonValue.Native(Integer.parseInt(string.substring(2), 16));
 					}
 				catch (Exception ignore)
 					{
@@ -162,18 +154,18 @@ public class JsonUtils
 				{
 				if(string.indexOf('.')>-1||string.indexOf('e')>-1||string.indexOf('E')>-1)
 					{
-					return Double.valueOf(string);
+					return new JsonValue.Native(Double.valueOf(string));
 					}
 				else
 					{
 					Long myLong=new Long(string);
 					if(myLong.longValue()==myLong.intValue())
 						{
-						return new Integer(myLong.intValue());
+						return new JsonValue.Native(myLong.intValue());
 						}
 					else
 						{
-						return myLong;
+						return new JsonValue.Native(myLong);
 						}
 					}
 				}
@@ -181,6 +173,6 @@ public class JsonUtils
 				{
 				}
 			}
-		return string;
+		return new JsonValue.JsonString(string);
 		}
 	}
