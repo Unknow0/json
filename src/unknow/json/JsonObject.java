@@ -864,13 +864,15 @@ public class JsonObject implements Iterable<String>, JsonValue
 	public void toString(StringBuilder sb)
 		{
 		sb.append("{");
+		boolean commante=false;
 		for(String o:map.keySet())
 			{
-			if(sb.length()>1)
+			if(commante)
 				sb.append(',');
 			sb.append(JsonUtils.quote(o));
 			sb.append(':');
 			map.get(o).toString(sb);
+			commante=true;
 			}
 		sb.append('}');
 		}
