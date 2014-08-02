@@ -591,7 +591,7 @@ public class JsonObject implements Iterable<String>, JsonValue
 	public String optString(String key, String defaultValue)
 		{
 		JsonValue object=opt(key);
-		return JsonValue.NULL.equals(object)?defaultValue:object.toString();
+		return JsonValue.NULL.equals(object)?defaultValue:object.value();
 		}
 
 	/**
