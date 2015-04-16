@@ -1,24 +1,13 @@
-/*******************************************************************************
- * Copyright (c) 2014 Unknow.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the GNU Lesser Public License v3
- * which accompanies this distribution, and is available at
- * http://www.gnu.org/licenses/lgpl-3.0.html
- * 
- * Contributors:
- * Unknow - initial API and implementation
- ******************************************************************************/
-package unknow.json;
+package unknow.json.parser;
 
 import java.io.*;
+import java.math.*;
 
-/**
- * A JsonTokener takes a source string and extracts characters and tokens from
- * it. It is used by the JsonObject and JsonArray constructors to parse
- * Json source strings.
- */
-public class JsonTokener
+import unknow.json.*;
+
+public class JsonParser<T>
 	{
+	private JsonHandler<T> handler;
 
 	private int character;
 	private boolean eof;
@@ -29,38 +18,52 @@ public class JsonTokener
 	private boolean usePrevious;
 
 	/**
-	 * Construct a JsonTokener from a Reader.
+	 * Construct a JsonParser from a Reader.
 	 *
-	 * @param reader     A reader.
+	 * @param handler     A handler.
 	 */
-	public JsonTokener(Reader reader)
+	public JsonParser(JsonHandler<T> handler)
 		{
-		this.reader= /*reader.markSupported() ?*/
-		reader /*: new BufferedReader(reader)*/;
+		this.handler=handler;
+		}
+
+	/**
+	* reset the parser and  from an InputStream.
+	*/
+	public T parse(InputStream inputStream) throws JsonException
+		{
+		return parse(new BufferedReader(new InputStreamReader(inputStream)));
+		}
+
+	/**
+	 * Construct a JsonParser from a string.
+	 *
+	 * @param s     A source string.
+	 * @throws JsonException 
+	 */
+	public T parse(String s) throws JsonException
+		{
+		return parse(new StringReader(s));
+		}
+
+	public T parse(Reader reader) throws JsonException
+		{
+		this.reader=reader;
 		this.eof=false;
 		this.usePrevious=false;
 		this.previous=0;
 		this.index=0;
 		this.character=1;
 		this.line=1;
-		}
-
-	/**
-	 * Construct a JsonTokener from an InputStream.
-	 */
-	public JsonTokener(InputStream inputStream) throws JsonException
-		{
-		this(new BufferedReader(new InputStreamReader(inputStream)));
-		}
-
-	/**
-	 * Construct a JsonTokener from a string.
-	 *
-	 * @param s     A source string.
-	 */
-	public JsonTokener(String s)
-		{
-		this(new StringReader(s));
+		parseNext();
+		try
+			{
+			reader.close();
+			}
+		catch (IOException e)
+			{
+			}
+		return handler.getValue();
 		}
 
 	/**
@@ -68,7 +71,7 @@ public class JsonTokener
 	 * so that you can test for a digit or letter before attempting to parse
 	 * the next number or identifier.
 	 */
-	public void back() throws JsonException
+	private void back() throws JsonException
 		{
 		if(usePrevious||index<=0)
 			{
@@ -80,48 +83,9 @@ public class JsonTokener
 		this.eof=false;
 		}
 
-	/**
-	 * Get the hex value of a character (base16).
-	 * @param c A character between '0' and '9' or between 'A' and 'F' or
-	 * between 'a' and 'f'.
-	 * @return  An int between 0 and 15, or -1 if c was not a hex digit.
-	 */
-	public static int dehexchar(char c)
-		{
-		if(c>='0'&&c<='9')
-			{
-			return c-'0';
-			}
-		if(c>='A'&&c<='F')
-			{
-			return c-('A'-10);
-			}
-		if(c>='a'&&c<='f')
-			{
-			return c-('a'-10);
-			}
-		return -1;
-		}
-
-	public boolean end()
+	private boolean end()
 		{
 		return eof&&!usePrevious;
-		}
-
-	/**
-	 * Determine if the source string still contains characters that next()
-	 * can consume.
-	 * @return true if not yet at the end of the source.
-	 */
-	public boolean more() throws JsonException
-		{
-		next();
-		if(end())
-			{
-			return false;
-			}
-		back();
-		return true;
 		}
 
 	/**
@@ -129,7 +93,7 @@ public class JsonTokener
 	 *
 	 * @return The next character, or 0 if past the end of the source string.
 	 */
-	public char next() throws JsonException
+	private char next() throws JsonException
 		{
 		int c;
 		if(this.usePrevious)
@@ -174,23 +138,6 @@ public class JsonTokener
 		}
 
 	/**
-	 * Consume the next character, and check that it matches a specified
-	 * character.
-	 * @param c The character to match.
-	 * @return The character.
-	 * @throws JsonException if the character does not match.
-	 */
-	public char next(char c) throws JsonException
-		{
-		char n=next();
-		if(n!=c)
-			{
-			throw syntaxError("Expected '"+c+"' and instead saw '"+n+"'");
-			}
-		return n;
-		}
-
-	/**
 	 * Get the next n characters.
 	 *
 	 * @param n     The number of characters to take.
@@ -199,7 +146,7 @@ public class JsonTokener
 	 *   Substring bounds error if there are not
 	 *   n characters remaining in the source string.
 	 */
-	public String next(int n) throws JsonException
+	private String next(int n) throws JsonException
 		{
 		if(n==0)
 			{
@@ -226,7 +173,7 @@ public class JsonTokener
 	 * @throws JsonException
 	 * @return  A character, or 0 if there are no more characters.
 	 */
-	public char nextClean() throws JsonException
+	private char nextClean() throws JsonException
 		{
 		for(;;)
 			{
@@ -249,7 +196,7 @@ public class JsonTokener
 	 * @return      A String.
 	 * @throws JsonException Unterminated string.
 	 */
-	public String nextString(char quote) throws JsonException
+	private String nextString(char quote) throws JsonException
 		{
 		char c;
 		StringBuffer sb=new StringBuffer();
@@ -305,62 +252,13 @@ public class JsonTokener
 		}
 
 	/**
-	 * Get the text up but not including the specified character or the
-	 * end of line, whichever comes first.
-	 * @param  delimiter A delimiter character.
-	 * @return   A string.
-	 */
-	public String nextTo(char delimiter) throws JsonException
-		{
-		StringBuffer sb=new StringBuffer();
-		for(;;)
-			{
-			char c=next();
-			if(c==delimiter||c==0||c=='\n'||c=='\r')
-				{
-				if(c!=0)
-					{
-					back();
-					}
-				return sb.toString().trim();
-				}
-			sb.append(c);
-			}
-		}
-
-	/**
-	 * Get the text up but not including one of the specified delimiter
-	 * characters or the end of line, whichever comes first.
-	 * @param delimiters A set of delimiter characters.
-	 * @return A string, trimmed.
-	 */
-	public String nextTo(String delimiters) throws JsonException
-		{
-		char c;
-		StringBuffer sb=new StringBuffer();
-		for(;;)
-			{
-			c=next();
-			if(delimiters.indexOf(c)>=0||c==0||c=='\n'||c=='\r')
-				{
-				if(c!=0)
-					{
-					back();
-					}
-				return sb.toString().trim();
-				}
-			sb.append(c);
-			}
-		}
-
-	/**
 	 * Get the next value. The value can be a Boolean, Double, Integer,
 	 * JsonArray, JsonObject, Long, or String, or the JsonObject.NULL object.
 	 * @throws JsonException If syntax error.
 	 *
 	 * @return An object.
 	 */
-	public JsonValue nextValue() throws JsonException
+	private void parseNext() throws JsonException
 		{
 		char c=nextClean();
 		String string;
@@ -369,13 +267,15 @@ public class JsonTokener
 			{
 			case '"':
 			case '\'':
-				return JsonUtils.wrap(nextString(c));
+				handler.newString(nextString(c));
 			case '{':
-				back();
-				return new JsonObject(this);
+				handler.startObject();
+				parseObject();
+				handler.endObject();
 			case '[':
-				back();
-				return new JsonArray(this);
+				handler.startArray();
+				parseArray();
+				handler.endArray();
 			}
 
 		/*
@@ -400,46 +300,133 @@ public class JsonTokener
 			{
 			throw syntaxError("Missing value");
 			}
-		return JsonUtils.stringToValue(string);
+		stringToValue(string);
 		}
 
-	/**
-	 * Skip characters until the next character is the requested character.
-	 * If the requested character is not found, no characters are skipped.
-	 * @param to A character to skip to.
-	 * @return The requested character, or zero if the requested character
-	 * is not found.
-	 */
-	public char skipTo(char to) throws JsonException
+	public void parseObject() throws JsonException
 		{
 		char c;
-		try
+
+		for(;;)
 			{
-			int startIndex=this.index;
-			int startCharacter=this.character;
-			int startLine=this.line;
-			reader.mark(Integer.MAX_VALUE);
-			do
+			c=nextClean();
+			switch (c)
 				{
-				c=next();
-				if(c==0)
+				case 0:
+					throw syntaxError("A JsonObject text must end with '}'");
+				case '}':
+					return;
+				case '"':
+				case '\'':
+					handler.newKey(nextString(c));
+					break;
+				default:
+					throw syntaxError("A JsonObject key must start with '\"'");
+				}
+
+			// The key is followed by ':'. We will also tolerate '=' or '=>'.
+			c=nextClean();
+			if(c=='=')
+				{
+				if(next()!='>')
+					back();
+				}
+			else if(c!=':')
+				throw syntaxError("Expected a ':' after a key");
+			parseNext();
+
+			// Pairs are separated by ','. We will also tolerate ';'.
+			switch (nextClean())
+				{
+				case ';':
+				case ',':
+					if(nextClean()=='}')
+						return;
+					back();
+					break;
+				case '}':
+					return;
+				default:
+					throw syntaxError("Expected a ',' or '}'");
+				}
+			}
+		}
+
+	public void parseArray() throws JsonException
+		{
+		if(nextClean()!=']')
+			{
+			back();
+			for(;;)
+				{
+				if(nextClean()==',')
 					{
-					reader.reset();
-					this.index=startIndex;
-					this.character=startCharacter;
-					this.line=startLine;
-					return c;
+					back();
+					handler.newNull();
+					}
+				else
+					{
+					back();
+					parseNext();
+					}
+				switch (nextClean())
+					{
+					case ';':
+					case ',':
+						if(nextClean()==']')
+							{
+							return;
+							}
+						back();
+						break;
+					case ']':
+						return;
+					default:
+						throw syntaxError("Expected a ',' or ']'");
 					}
 				}
-			while (c!=to);
 			}
-		catch (IOException exc)
-			{
-			throw new JsonException(exc);
-			}
+		}
 
-		back();
-		return c;
+	public void stringToValue(String string) throws JsonException
+		{
+		if(string.equalsIgnoreCase("true"))
+			handler.newBoolean(Boolean.TRUE);
+		if(string.equalsIgnoreCase("false"))
+			handler.newBoolean(Boolean.FALSE);
+		if(string.equalsIgnoreCase("null"))
+			handler.newNull();
+
+		/*
+		 * If it might be a number, try converting it. We support the
+		 * non-standard 0x- convention. If a number cannot be produced, then the
+		 * value will just be a string. Note that the 0x-, plus, and implied
+		 * string conventions are non-standard. A Json parser may accept
+		 * non-Json forms as long as it accepts all correct Json forms.
+		 */
+
+		char b=string.charAt(0);
+		if((b>='0'&&b<='9')||b=='.'||b=='-'||b=='+')
+			{
+			if(b=='0'&&string.length()>2&&(string.charAt(1)=='x'||string.charAt(1)=='X'))
+				{
+				try
+					{
+					handler.newNumber(BigDecimal.valueOf(Long.parseLong(string.substring(2), 16)));
+					}
+				catch (Exception ignore)
+					{
+					}
+				}
+			try
+				{
+				handler.newNumber(new BigDecimal(string));
+				}
+			catch (Exception ignore)
+				{
+				}
+			}
+		handler.newString(string);
 		}
 
 	/**
@@ -448,7 +435,7 @@ public class JsonTokener
 	 * @param message The error message.
 	 * @return  A JsonException object, suitable for throwing
 	 */
-	public JsonException syntaxError(String message)
+	private JsonException syntaxError(String message)
 		{
 		return new JsonException(message+toString());
 		}

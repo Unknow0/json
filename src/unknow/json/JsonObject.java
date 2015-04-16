@@ -32,87 +32,6 @@ public class JsonObject implements Iterable<String>, JsonValue
 		}
 
 	/**
-	 * Construct a JsonObject from a JsonTokener.
-	 * 
-	 * @param x
-	 *            A JsonTokener object containing the source string.
-	 * @throws JsonException
-	 *             If there is a syntax error in the source string or a
-	 *             duplicated key.
-	 */
-	public JsonObject(JsonTokener x) throws JsonException
-		{
-		this();
-		char c;
-		String key;
-
-		if(x.nextClean()!='{')
-			{
-			throw x.syntaxError("A JsonObject text must begin with '{'");
-			}
-		for(;;)
-			{
-			c=x.nextClean();
-			switch (c)
-				{
-				case 0:
-					throw x.syntaxError("A JsonObject text must end with '}'");
-				case '}':
-					return;
-				case '"':
-				case '\'':
-					key=x.nextString(c);
-					break;
-				default:
-					throw x.syntaxError("A JsonObject key must start with '\"'");
-				}
-
-			// The key is followed by ':'. We will also tolerate '=' or '=>'.
-			c=x.nextClean();
-			if(c=='=')
-				{
-				if(x.next()!='>')
-					x.back();
-				}
-			else if(c!=':')
-				throw x.syntaxError("Expected a ':' after a key");
-			putOnce(key, x.nextValue());
-
-			// Pairs are separated by ','. We will also tolerate ';'.
-			switch (x.nextClean())
-				{
-				case ';':
-				case ',':
-					if(x.nextClean()=='}')
-						return;
-					x.back();
-					break;
-				case '}':
-					return;
-				default:
-					throw x.syntaxError("Expected a ',' or '}'");
-				}
-			}
-		}
-
-	/**
-	 * Construct a JsonObject from a source Json text string. This is the most
-	 * commonly used JsonObject constructor.
-	 * 
-	 * @param source
-	 *            A string beginning with <code>{</code>&nbsp;<small>(left
-	 *            brace)</small> and ending with <code>}</code>
-	 *            &nbsp;<small>(right brace)</small>.
-	 * @exception JsonException
-	 *                If there is a syntax error in the source string or a
-	 *                duplicated key.
-	 */
-	public JsonObject(String source) throws JsonException
-		{
-		this(new JsonTokener(source));
-		}
-
-	/**
 	 * Append values to the array under a key. If the key does not exist in the
 	 * JsonObject, then the key is put in the JsonObject with its value being a
 	 * JsonArray containing the value parameter. If the key was already
@@ -591,7 +510,10 @@ public class JsonObject implements Iterable<String>, JsonValue
 	public String optString(String key, String defaultValue)
 		{
 		JsonValue object=opt(key);
-		return JsonValue.NULL.equals(object)?defaultValue:object.value();
+		if(JsonValue.NULL.equals(object)||!(object instanceof JsonValue.JsonString))
+			return defaultValue;
+		else
+			return ((JsonValue.JsonString)object).value();
 		}
 
 	/**

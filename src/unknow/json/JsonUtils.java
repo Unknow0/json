@@ -10,6 +10,7 @@
  ******************************************************************************/
 package unknow.json;
 
+import java.math.*;
 
 public class JsonUtils
 	{
@@ -30,12 +31,13 @@ public class JsonUtils
 			return new JsonValue.JsonString((String)object);
 		if(object instanceof JsonValue)
 			return (JsonValue)object;
-		if(object instanceof Byte||object instanceof Character||object instanceof Short||object instanceof Integer||object instanceof Long||object instanceof Boolean||object instanceof Float||object instanceof Double)
+		if(object instanceof Byte||object instanceof Character||object instanceof Short||object instanceof Integer||object instanceof Long||object instanceof Boolean||object instanceof Float||object instanceof Double||object instanceof BigDecimal)
 			return new JsonValue.Native(object);
 		if(object.getClass().isArray())
 			return new JsonArray(object);
 		return null;
 		}
+
 	/**
 	 * Produce a string in double quotes with backslash sequences in all the
 	 * right places. A backslash will be inserted within </, producing <\/,
@@ -116,6 +118,7 @@ public class JsonUtils
 	 * 
 	 * @param string
 	 *            A String.
+	 * @return 
 	 * @return A simple Json value.
 	 */
 	public static JsonValue stringToValue(String string)
