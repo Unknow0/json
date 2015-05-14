@@ -7,7 +7,8 @@ import unknow.json.*;
 
 public class DefaultHandler implements JsonHandler<JsonValue>
 	{
-	private Queue<JsonValue> queue=new LinkedList<JsonValue>();
+	private Deque<JsonValue> queue=new LinkedList<JsonValue>();
+	private JsonValue root=null;
 	private String key;
 
 	public void init()
@@ -16,12 +17,11 @@ public class DefaultHandler implements JsonHandler<JsonValue>
 		key=null;
 		}
 
-	public void newString(String str) throws JsonException
+	private void append(JsonValue value) throws JsonException
 		{
-		JsonValue value=JsonUtils.wrap(str);
 		if(!queue.isEmpty())
 			{
-			JsonValue head=queue.peek();
+			JsonValue head=queue.peekFirst();
 			if(head instanceof JsonObject&&key!=null)
 				{
 				((JsonObject)head).putOnce(key, value);
@@ -29,69 +29,49 @@ public class DefaultHandler implements JsonHandler<JsonValue>
 				}
 			else if(head instanceof JsonArray)
 				((JsonArray)head).put(value);
+			if(value instanceof JsonObject||value instanceof JsonArray)
+				queue.offerFirst(value);
 			}
 		else
-			queue.offer(value);
+			{
+			queue.offerFirst(value);
+			root=value;
+			}
+		}
+
+	public void newString(String str) throws JsonException
+		{
+		append(JsonUtils.wrap(str));
 		}
 
 	public void newNumber(BigDecimal nbr) throws JsonException
 		{
-		JsonValue value=JsonUtils.wrap(nbr);
-		if(!queue.isEmpty())
-			{
-			JsonValue head=queue.peek();
-			if(head instanceof JsonObject&&key!=null)
-				((JsonObject)head).putOnce(key, value);
-			else if(head instanceof JsonArray)
-				((JsonArray)head).put(value);
-			}
-		else
-			queue.offer(value);
+		append(JsonUtils.wrap(nbr));
 		}
 
 	public void newBoolean(boolean b) throws JsonException
 		{
-		JsonValue value=JsonUtils.wrap(b);
-		if(!queue.isEmpty())
-			{
-			JsonValue head=queue.peek();
-			if(head instanceof JsonObject&&key!=null)
-				((JsonObject)head).putOnce(key, value);
-			else if(head instanceof JsonArray)
-				((JsonArray)head).put(value);
-			}
-		else
-			queue.offer(value);
+		append(JsonUtils.wrap(b));
 		}
 
 	public void newNull() throws JsonException
 		{
-		JsonValue value=JsonValue.NULL;
-		if(!queue.isEmpty())
-			{
-			JsonValue head=queue.peek();
-			if(head instanceof JsonObject&&key!=null)
-				((JsonObject)head).putOnce(key, value);
-			else if(head instanceof JsonArray)
-				((JsonArray)head).put(value);
-			}
-		else
-			queue.offer(value);
+		append(JsonValue.NULL);
 		}
 
 	public void startArray() throws JsonException
 		{
-		queue.offer(new JsonArray());
+		append(new JsonArray());
 		}
 
 	public void endArray() throws JsonException
 		{
-		queue.poll();
+		queue.pollFirst();
 		}
 
 	public void startObject() throws JsonException
 		{
-		queue.offer(new JsonObject());
+		append(new JsonObject());
 		}
 
 	public void newKey(String key) throws JsonException
@@ -101,11 +81,11 @@ public class DefaultHandler implements JsonHandler<JsonValue>
 
 	public void endObject() throws JsonException
 		{
-		queue.poll();
+		queue.pollFirst();
 		}
 
 	public JsonValue getValue()
 		{
-		return queue.peek();
+		return root;
 		}
 	}
