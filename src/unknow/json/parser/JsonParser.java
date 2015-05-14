@@ -268,14 +268,17 @@ public class JsonParser<T>
 			case '"':
 			case '\'':
 				handler.newString(nextString(c));
+				return;
 			case '{':
 				handler.startObject();
 				parseObject();
 				handler.endObject();
+				return;
 			case '[':
 				handler.startArray();
 				parseArray();
 				handler.endArray();
+				return;
 			}
 
 		/*
@@ -321,7 +324,7 @@ public class JsonParser<T>
 					handler.newKey(nextString(c));
 					break;
 				default:
-					throw syntaxError("A JsonObject key must start with '\"'");
+					throw syntaxError("A JsonObject key must start with '\"' got '"+c+"'");
 				}
 
 			// The key is followed by ':'. We will also tolerate '=' or '=>'.
@@ -392,41 +395,45 @@ public class JsonParser<T>
 		{
 		if(string.equalsIgnoreCase("true"))
 			handler.newBoolean(Boolean.TRUE);
-		if(string.equalsIgnoreCase("false"))
+		else if(string.equalsIgnoreCase("false"))
 			handler.newBoolean(Boolean.FALSE);
-		if(string.equalsIgnoreCase("null"))
+		else if(string.equalsIgnoreCase("null"))
 			handler.newNull();
-
-		/*
-		 * If it might be a number, try converting it. We support the
-		 * non-standard 0x- convention. If a number cannot be produced, then the
-		 * value will just be a string. Note that the 0x-, plus, and implied
-		 * string conventions are non-standard. A Json parser may accept
-		 * non-Json forms as long as it accepts all correct Json forms.
-		 */
-
-		char b=string.charAt(0);
-		if((b>='0'&&b<='9')||b=='.'||b=='-'||b=='+')
+		else
 			{
-			if(b=='0'&&string.length()>2&&(string.charAt(1)=='x'||string.charAt(1)=='X'))
+			/*
+			 * If it might be a number, try converting it. We support the
+			 * non-standard 0x- convention. If a number cannot be produced, then the
+			 * value will just be a string. Note that the 0x-, plus, and implied
+			 * string conventions are non-standard. A Json parser may accept
+			 * non-Json forms as long as it accepts all correct Json forms.
+			 */
+
+			char b=string.charAt(0);
+			if((b>='0'&&b<='9')||b=='.'||b=='-'||b=='+')
 				{
+				if(b=='0'&&string.length()>2&&(string.charAt(1)=='x'||string.charAt(1)=='X'))
+					{
+					try
+						{
+						handler.newNumber(BigDecimal.valueOf(Long.parseLong(string.substring(2), 16)));
+						return;
+						}
+					catch (Exception ignore)
+						{
+						}
+					}
 				try
 					{
-					handler.newNumber(BigDecimal.valueOf(Long.parseLong(string.substring(2), 16)));
+					handler.newNumber(new BigDecimal(string));
+					return;
 					}
 				catch (Exception ignore)
 					{
 					}
 				}
-			try
-				{
-				handler.newNumber(new BigDecimal(string));
-				}
-			catch (Exception ignore)
-				{
-				}
+			handler.newString(string);
 			}
-		handler.newString(string);
 		}
 
 	/**
