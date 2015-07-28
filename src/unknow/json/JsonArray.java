@@ -964,7 +964,7 @@ public class JsonArray implements Iterable<JsonValue>, JsonValue
 
 	public boolean contains(Object o)
 		{
-		return myArrayList.contains(o==null?JsonValue.NULL:o);
+		return myArrayList.contains(JsonUtils.wrap(o));
 		}
 
 	public Iterator<JsonValue> iterator()
