@@ -21,7 +21,7 @@ For lastest release version:
 
 		<dependencies>
 			<dependency>
-				<groupId>unknow</groupId>
+				<groupId>unknow.json</groupId>
 				<artifactId>json</artifactId>
 				<version>1.1</version>
 			</dependency>
@@ -44,7 +44,7 @@ For the developement version:
 
 		<dependencies>
 			<dependency>
-				<groupId>unknow</groupId>
+				<groupId>unknow.json</groupId>
 				<artifactId>json</artifactId>
 				<version>1.2-SNAPSHOT</version>
 			</dependency>
